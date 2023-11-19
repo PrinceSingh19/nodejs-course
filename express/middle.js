@@ -4,6 +4,11 @@ const PORT = 3000;
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
+app.use((req, res, next) => {
+	const start = Date.now();
+	console.log(`${req} ${res} ${start}`);
+	next();
+});
 app.get("/", (req, res) => {
 	res.send("<ul><li>HI</li></ul>");
 });
