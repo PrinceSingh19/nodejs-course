@@ -1,7 +1,8 @@
 const messages = require("../model/messages.model");
 
 function getMessages(req, res) {
-	res.send(messages);
+	console.log(__dirname);
+	res.send("OK");
 }
 function getSingleMessage(req, res) {
 	const id = Number(req.params.id);

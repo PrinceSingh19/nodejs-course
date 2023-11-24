@@ -6,7 +6,7 @@ const req = request("https://www.google.com", (res) => {
 	console.log("Response is receiving ===");
 
 	res.on("data", (chunk) => console.log(`data chunk is: ${chunk}`));
-	res.on("end", () => console.log("Responde ended and there is no more data"));
+	res.on("end", () => console.log("Response ended and there is no more data"));
 });
 
 // if you are making request using the request object then you need to pass this explicitly otherwise nothing will happen
