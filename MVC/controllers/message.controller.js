@@ -1,8 +1,7 @@
 const messages = require("../model/messages.model");
-
+const path = require("path");
 function getMessages(req, res) {
-	console.log(__dirname);
-	res.send("OK");
+	res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 }
 function getSingleMessage(req, res) {
 	const id = Number(req.params.id);
