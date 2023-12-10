@@ -15,10 +15,6 @@ const config = {
 	SECRET_KEY1: process.env.SECRET_KEY1,
 	SECRET_KEY2: process.env.SECRET_KEY2,
 };
-//express application code
-const app = express();
-app.use(express.static(path.join(__dirname, ".", "public")));
-app.use(helmet());
 
 const AuthOptions = {
 	callbackURL: "/auth/google/callback",
@@ -41,10 +37,14 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((id, done) => {
 	done(null, id);
 });
+//express application code
+const app = express();
+// apply this helmet middleware first to suppress the extra headers and before running any other middleware.
+//helmet middleware
+app.use(helmet());
 
 //to serve the static files stored on the server inside the public folder
-
-//helmet middleware
+app.use(express.static(path.join(__dirname, ".", "public")));
 
 //initialize the session after the helmet so that the endpoints are secured and need to add befor passport so that it can use the session info
 app.use(
