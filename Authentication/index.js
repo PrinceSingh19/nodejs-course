@@ -6,13 +6,19 @@ const helmet = require("helmet");
 require("dotenv").config();
 const passport = require("passport");
 const { Strategy } = require("passport-google-oauth20");
+const cookieSession = require("cookie-session");
 
 const PORT = 3000;
-
 const config = {
 	CLIENT_ID: process.env.CLIENT_ID,
 	CLIENT_SECRET: process.env.CLIENT_SECRET,
+	SECRET_KEY1: process.env.SECRET_KEY1,
+	SECRET_KEY2: process.env.SECRET_KEY2,
 };
+//express application code
+const app = express();
+app.use(express.static(path.join(__dirname, ".", "public")));
+app.use(helmet());
 
 const AuthOptions = {
 	callbackURL: "/auth/google/callback",
@@ -26,14 +32,48 @@ function verifyCallback(accessToken, refreshToken, profile, done) {
 }
 
 passport.use(new Strategy(AuthOptions, verifyCallback));
-//express application code
-const app = express();
+//It saves the session to the cookie
+passport.serializeUser((user, done) => {
+	done(null, user.id);
+});
+
+//It is used to read the session from cookie
+passport.deserializeUser((id, done) => {
+	done(null, id);
+});
+
 //to serve the static files stored on the server inside the public folder
-app.use(express.static(path.join(__dirname, ".", "public")));
 
 //helmet middleware
-app.use(helmet());
+
+//initialize the session after the helmet so that the endpoints are secured and need to add befor passport so that it can use the session info
+app.use(
+	cookieSession({
+		name: "session",
+		maxAge: 60 * 1000,
+		keys: [config.SECRET_KEY1, config.SECRET_KEY2], //Add two different keys so that when on key needs to change then the other key handles the request until every user is on the latest key. second key helps in key rotation
+	})
+);
+
+app.use((req, res, next) => {
+	// Stub out missing regenerate and save functions.
+	// These don't make sense for client side sessions.
+	if (req.session && !req.session.regenerate) {
+		req.session.regenerate = (cb) => {
+			cb();
+		};
+	}
+	if (req.session && !req.session.save) {
+		req.session.save = (cb) => {
+			cb();
+		};
+	}
+
+	next();
+});
+
 app.use(passport.initialize());
+app.use(passport.session());
 
 //check if user is logged in
 
@@ -55,7 +95,8 @@ app.use(passport.initialize());
 // });
 
 function checkLoginStatus(req, res, next) {
-	const isLoggedIn = true;
+	console.log(`User is ${req.user}`);
+	const isLoggedIn = req.isAuthenticated() && req.user;
 	const excludeRoutes = ["/", "/campaign"];
 
 	if (excludeRoutes.includes(req.path)) {
@@ -89,12 +130,20 @@ app.get(
 	passport.authenticate("google", {
 		failureRedirect: "/failure",
 		successRedirect: "/",
-		session: false,
+		session: true,
 	}),
 	(req, res) => console.log("Google Called us  back!")
 );
 
-app.get("/auth/logout", (req, res) => {});
+//Removes req.user and clears any logged in session
+app.get("/auth/logout", (req, res, next) => {
+	req.logout((err) => {
+		if (err) {
+			return next(err);
+		}
+		return res.redirect("/");
+	});
+});
 app.get("/failure", (req, res) => {
 	res.send("Failed to log in!");
 });
@@ -109,5 +158,5 @@ https
 		app
 	)
 	.listen(PORT, (req, res) => {
-		console.log("Server is connected and running");
+		console.log(`Connected on https://localhost:${PORT}`);
 	});
