@@ -1,20 +1,10 @@
 const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 
 const users = require("./model/users");
 
-function verifyCallback(username, password, done) {
-	console.log(username, password);
-	const user = users.find((user) => user.username === username);
-	console.log(user, "found");
-	if (!user) {
-		return done(null, false);
-	}
-	return done(null, user);
-}
-
+// function to extract the cookie from the response header
 var cookieExtractor = function (req) {
 	var token = null;
 	if (req && req.cookies) {
@@ -22,12 +12,8 @@ var cookieExtractor = function (req) {
 	}
 	return token;
 };
-function passportMiddleWare() {
-	passport.use(
-		new LocalStrategy({ usernameField: "username", passwordField: "password" }, verifyCallback)
-	);
-}
 
+// function to use the jwt as strategy to authenticate the users
 function passportAuth() {
 	try {
 		passport.use(
@@ -37,9 +23,7 @@ function passportAuth() {
 					secretOrKey: "my_secret_key",
 				},
 				function (jwt_payload, done) {
-					console.log(jwt_payload, " jwt payload");
 					const user = users.find((user) => jwt_payload.username === user.username);
-					console.log(user, "found");
 					if (!user) {
 						return done(null, false);
 					}
@@ -49,11 +33,11 @@ function passportAuth() {
 			)
 		);
 	} catch (error) {
-		console.log(error);
 		throw error;
 	}
 }
 
+// function to add the authentication on the selective routes using the jwt strategy
 function authenticate(req, res, next) {
 	// Use Passport to authenticate the request using the "jwt" strategy
 	passport.authenticate("jwt", { session: false }, (err, user) => {
@@ -73,6 +57,5 @@ function authenticate(req, res, next) {
 
 module.exports = {
 	passportAuth,
-	passportMiddleWare,
 	authenticate,
 };
