@@ -1,6 +1,7 @@
 const express = require("express");
 const loginRouter = express.Router();
 
+//importing the getLoginForm and postLoginDetails from controllers/loginController.js file
 const { getLoginForm, postLoginDetails } = require("../controllers/loginController");
 
 // router for the GET method of the login form

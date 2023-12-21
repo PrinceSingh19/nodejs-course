@@ -8,8 +8,6 @@ const cookieParser = require("cookie-parser");
 const { authenticate, passportAuth } = require("./passport");
 const loginRouter = require("./routes/loginRouter");
 
-require("dotenv").config();
-
 const app = express();
 const PORT = 3000;
 
