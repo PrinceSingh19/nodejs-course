@@ -1,8 +1,10 @@
 import express from "express";
-import { getAllLaunches } from "./launches.controller.js";
+import { httpDeleteLaunch, httpGetLaunches, httpPostLaunches } from "./launches.controller.js";
 
 const launchesRouter = express.Router();
 
-launchesRouter.get("/launches", getAllLaunches);
+launchesRouter.get("/", httpGetLaunches);
+launchesRouter.post("/", httpPostLaunches);
+launchesRouter.delete("/:id", httpDeleteLaunch);
 
 export { launchesRouter };

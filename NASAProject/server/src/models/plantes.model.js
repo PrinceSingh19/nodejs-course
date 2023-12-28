@@ -41,4 +41,6 @@ function loadPlanetsData() {
 	});
 }
 
-export { planets, loadPlanetsData };
+const getAllPlanets = () => planets;
+
+export { getAllPlanets, loadPlanetsData };
